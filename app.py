@@ -9,6 +9,10 @@ from linebot import (
 from linebot.exceptions import (
     InvalidSignatureError
 )
+#引用currency模組裡的CurrencyCrawler類別
+from modules.currency import CurrencyCrawler
+
+cw = CurrencyCrawler()
 
 # MessageEvent: 收到訊息的處理器
 # TextMessage: 接收使用者文字訊息的處理器
@@ -21,13 +25,19 @@ from linebot.models import (
     MessageEvent, TextMessage, StickerMessage, TextSendMessage, StickerSendMessage, LocationSendMessage, TemplateSendMessage, ButtonsTemplate, PostbackAction, MessageAction, URIAction, CarouselTemplate, CarouselColumn
 )
 
+# 引用menu裡的Menu
+from menu import Menu
+
+menu_obj = Menu()
+
 # 定義應用程式是一個Flask類別產生的實例
 app = Flask(__name__)
 
 # LINE的Webhook為了辨識開發者身份所需的資料
 # 相關訊息進入網址(https://developers.line.me/console/)
-CHANNEL_ACCESS_TOKEN = '請將此字串置換成你的 CHANNEL_ACCESS_TOKEN'
-CHANNEL_SECRET = '請將此字串置換成你的 CHANNEL_SECRET'
+#CHANNEL_ACCESS_TOKEN = '請將此字串置換成你的 CHANNEL_ACCESS_TOKEN'
+CHANNEL_ACCESS_TOKEN = 'lBSFmdhh00oWpGml6l4WI/ecvHHuxxPL0bFbaMldtuywbqPlr/KVYirmnMIcYSWrAgt1dRLMIETWZK0u6Lgi3KnXyFAnBBpbVrKCg7g47fD+XJCEOOVHuOpQHzz82kYI2D3J/sDP2/N/qca5/mAssQdB04t89/1O/w1cDnyilFU='
+CHANNEL_SECRET = '9115c2a1b022d48ebfe4b6fa698b16b3'
 
 # ================== 以下為 X-LINE-SIGNATURE 驗證程序 ==================
 
@@ -68,8 +78,31 @@ def handle_message(event):
     # event.message.text : 使用者輸入的訊息內容
     print('[使用者傳入文字訊息]')
     print(str(event))
+    # 印出使用者資訊 
+    profile = line_bot_api.get_profile(event.source.user_id)
+    # print(profile.display_name)  使用者名稱
+    # print(profile.user_id)   使用者id
+    # print(profile.picture_url)  照片
+    # print(profile.status_message) 狀態
+    # 問答表
+    faq = {
+        "聯絡電話": TextSendMessage(text='22311513'),
+        "聯絡地址": LocationSendMessage(
+            title="我的地標",
+            address="台灣大學",
+            latitude=25.0155759,
+            longitude=121.5395909
+        ),
+        "公司官網": TextSendMessage(text="https://www.google.com"),
+        "選單": menu_obj.content
+    }
     # 準備要回傳的文字訊息
-    reply = TextSendMessage(text='Hi')
+    reply = TextSendMessage(text='這是我的固定回覆，你剛才說的是 %s' %(event.message.text))
+    if event.message.text in faq:
+        reply = faq[event.message.text]
+    else:
+        cw.fetch_data()
+        reply = TextSendMessage(text=cw.get_data(event.message.text.upper()))
 
     # 回傳訊息
     line_bot_api.reply_message(
@@ -103,4 +136,5 @@ if __name__ == "__main__":
     print('[Flask運行於連接端口:{}]'.format(port))
     # 本機測試使用127.0.0.1, debug=True
     # Heroku部署使用 0.0.0.0
-    app.run(host='127.0.0.1', port=port, debug=True)
+    #app.run(host='127.0.0.1', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port)
