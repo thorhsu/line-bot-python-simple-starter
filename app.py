@@ -94,11 +94,12 @@ def handle_message(event):
             longitude=121.5395909
         ),
         "公司官網": TextSendMessage(text="https://www.google.com"),
-        "選單": menu_obj.content
+        "選單": menu_obj.content,
+        "hello": StickerSendMessage(package_id='1', sticker_id='137') 
     }
     # 準備要回傳的文字訊息
     reply = TextSendMessage(text='這是我的固定回覆，你剛才說的是 %s' %(event.message.text))
-    if event.message.text in faq:
+    if event.message.text.lower() in faq:
         reply = faq[event.message.text]
     else:
         cw.fetch_data()
