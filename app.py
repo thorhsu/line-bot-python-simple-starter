@@ -99,8 +99,9 @@ def handle_message(event):
     }
     # 準備要回傳的文字訊息
     reply = TextSendMessage(text='這是我的固定回覆，你剛才說的是 %s' %(event.message.text))
-    if event.message.text.lower() in faq:
-        reply = faq[event.message.text.lower()]
+    mstTxt = event.message.text.lower().strip()
+    if mstTxt in faq:
+        reply = faq[mstTxt]
     else:
         cw.fetch_data()
         reply = TextSendMessage(text=cw.get_data(event.message.text.upper()))
