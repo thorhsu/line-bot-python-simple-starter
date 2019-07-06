@@ -11,6 +11,8 @@ from linebot.exceptions import (
 )
 #引用currency模組裡的CurrencyCrawler類別
 from modules.currency import CurrencyCrawler
+import firebase_admin
+from firebase_admin import credentials, firestore, auth
 
 cw = CurrencyCrawler()
 
